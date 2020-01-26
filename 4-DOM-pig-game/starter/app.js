@@ -9,17 +9,20 @@ GAME RULES:
 
 */
 // Initial Variables
+var scores, roundScore, lastRollDice1, lastRollDice2, activePlayer, gamePlaying, maxScore, setMaxScore;
 
-var scores, roundScore, prevRoll, activePlayer, gamePlaying;
-
+// Initiation Function
 init();
 
+// Initiation Function Definition and Values
 function init(){
     scores = [0,0]
     roundScore = 0;
     activePlayer = 0;
     gamePlaying = true;
+    maxScore = 100;
     document.querySelector('.dice').style.display = 'none';
+    document.querySelector('.dice2').style.display = 'none';
     document.getElementById('score-0').textContent = 0;
     document.getElementById('score-1').textContent = 0;
     document.getElementById('current-0').textContent = 0;
@@ -30,37 +33,32 @@ function init(){
     document.querySelector('.player-1-panel').classList.remove('winner');
     document.querySelector('.player-0-panel').classList.remove('active');
     document.querySelector('.player-1-panel').classList.remove('active');
-    document.querySelector('.player-0-panel').classList.add('active');
-    
+    document.querySelector('.player-0-panel').classList.add('active');    
 }
 
 // Button ROLL Function **
 document.querySelector('.btn-roll').addEventListener('click', function() {
     if (gamePlaying){
          var dice = Math.floor(Math.random() * 6) + 1;
+         var diceTwo = Math.floor(Math.random() * 6) + 1;
          var diceDOM = document.querySelector('.dice');
+         var diceDOM2 = document.querySelector('.dice2');
          diceDOM.style.display = 'block';
+         diceDOM2.style.display = 'block';
          diceDOM.src = 'dice-' + dice + '.png';
-         if (dice !== 1) {
-             if (dice > 5) {
-                let prevRoll = 6;
-                console.log('The previous rolled dice was ' + prevRoll);
-             } 
-             
-             if (prevRoll == 6 && dice == 6) {
-                document.getElementById('score-'+activePlayer).textContent = '0';
-                activePlayer === 0 ? activePlayer = 1 : activePlayer = 0;
-                roundScore = 0;
-             } else {
-                roundScore += dice;
-                document.querySelector('#current-' + activePlayer).textContent = roundScore;
-             }
-             
+         diceDOM2.src = 'dice-' + diceTwo + '.png';
+         if ((lastRollDice1 == 6 && dice == 6) || (lastRollDice2 == 6 && diceTwo == 6)) {
+             scores[activePlayer] = 0;
+             document.getElementById('score-' + activePlayer).textContent = 0;
+             nextPlayer()
+         } else if (dice !== 1 || diceTwo !== 1) {    
+            roundScore += dice + diceTwo;
+            document.querySelector('#current-' + activePlayer).textContent = roundScore;  
          } else {
              nextPlayer()
          }
-         console.log('The current roll is ' + dice);
-    }
+    }   lastRollDice1 = dice;
+        lastRollDice2 = diceTwo;          
 });
 
 // HOLD Score button Function
@@ -68,9 +66,10 @@ document.querySelector('.btn-hold').addEventListener('click', function () {
     if (gamePlaying) {
         scores[activePlayer] += roundScore
         document.getElementById('score-' + activePlayer).textContent = scores[activePlayer];
-        if (scores[activePlayer] >= 100) {
+        if (scores[activePlayer] >= maxScore) {
             document.querySelector('#name-' + activePlayer).textContent = 'WINNER!';
             document.querySelector('.dice').style.display = 'none';
+            document.querySelector('.dice2').style.display = 'none';
             document.querySelector('.player-' + activePlayer + '-panel').classList.add('winner');
             document.querySelector('.player-' + activePlayer + '-panel').classList.remove('active');
             gamePlaying = false;
@@ -92,16 +91,21 @@ function nextPlayer(){
     document.querySelector('.player-0-panel').classList.toggle('active');
     document.querySelector('.player-1-panel').classList.toggle('active');
     document.querySelector('.dice').style.display = 'none';
+    document.querySelector('.dice2').style.display = 'none';
+
 }
 
+// Set the MAX GAME SCORE Function
+function setMaxScore(num) {
+    if (gamePlaying){
+        maxScore = num
+        return num;
+    } 
+}
 
-
-
-
-
-// document.querySelector('.player-0-panel').classlist.remove('active');
-// document.querySelector('.player-1-panel').classlist.add('active');
-
-// document.querySelector('#current-' + activePlayer).textContent = dice;
-// var x = document.querySelector('#score-0').textContent;
-// console.log(x);
+// Set the MAX GAME SCORE ENTER Button
+document.querySelector('.final-score').addEventListener('input', function () {
+    if (gamePlaying) {
+        maxScore = setMaxScore(parseInt(document.querySelector('.final-score').value));
+    }
+});
